@@ -1,41 +1,20 @@
-const axios = require('axios')
-const excel = require('excel4node')
-const moment = require('moment')
+const express = require('express')
+const handlebars = require('express-handlebars')
 
-const wb = new excel.Workbook();
-const ws = worksheet = wb.addWorksheet('Sheet 1');
+const createExcel = require('./createExcel')
 
-const minutes = 1
-const time = minutes * 60 * 100
+const app = express()
 
-let cellValue = 3
+const port = '8000'
 
-const getData = () => {
-  axios.get('http://miejskoaktywni.pl/getdata.php')
-    .then(res => {
-      const data = Object.values(res.data)
-  
-      ws.cell(2, 2).string('Basen Włókiennicza')
-      ws.cell(2, 3).string('Basen Stroma')
-      ws.cell(2, 4).string('Basen Kameralny')
-      ws.cell(2, 5).string('Lodowisko')
-      ws.cell(2, 7).string('Data')
+app.engine('handlebars', handlebars.engine());
+app.set('view engine', 'handlebars');
+app.set('views', './views')
 
-      ws.cell(cellValue, 2).string(`${data[0]}`)
-      ws.cell(cellValue, 3).string(`${data[1]}`)
-      ws.cell(cellValue, 4).string(`${data[2]}`)
-      ws.cell(cellValue, 5).string(`${data[3]}`)
-      ws.cell(cellValue, 7).string(`${moment().format('YYYY-MM-DD HH:mm:ss')}`)
-      cellValue++
-    })
-    .then(() => wb.write('baseniarz.xlsx'))
-    .catch(err => {
-      console.log(err)
-    })
-}
+app.get('/', (req, res) => {
+  res.render('home', data)
+})
 
-getData()
-
-setInterval(() => {
-  getData()
-}, time)
+app.listen(port, () => {
+  console.log(`Listening to requests on http://localhost:${port}`);
+})
